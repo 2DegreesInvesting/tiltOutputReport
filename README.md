@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-1. Data Preparation: Place your input CSV files in the appropriate directory. The input files should include:
+1. Data Preparation: Place your input CSV files in the `input/data` directory. The input files should include:
 - companies.csv
 - tiltLedger_mapping.csv
 - tiltLedger.csv
@@ -22,5 +22,5 @@ pip install -r requirements.txt
 - company_indicators.csv
 - sbi_activities.csv
 - companies_sbi_activities2.csv
-2. Run the `single_company_pdf.py` script
+2. Run the `company_pdf_creation.py` script
 3. Output: The script will generate PDF reports in the output directory. Visualizations will be saved in the figures directory.
