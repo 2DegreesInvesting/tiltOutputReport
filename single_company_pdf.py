@@ -27,13 +27,13 @@ os.makedirs('figures', exist_ok=True)
 os.makedirs('output', exist_ok=True)
 
 # Load CSV files into DataFrames
-company_df = pd.read_csv('data_sohail_v2/companies.csv')
-company_tilt_ledger_df = pd.read_csv('data_sohail_v2/tiltLedger_mapping.csv')
-tilt_ledger_df = pd.read_csv('data_sohail_v2/tiltLedger.csv')
-company_product_indicators_df = pd.read_csv('data_sohail_v2/company_product_indicators.csv')
-company_indicators_df = pd.read_csv('data_sohail_v2/company_indicators.csv')
-sbi_activities_df = pd.read_csv('data_sohail_v2/sbi_activities.csv')
-companies_sbi_activities_df = pd.read_csv('data_sohail_v2/companies_sbi_activities2.csv')
+company_df = pd.read_csv('input/data_sohail_v2/companies.csv')
+company_tilt_ledger_df = pd.read_csv('input/data_sohail_v2/tiltLedger_mapping.csv')
+tilt_ledger_df = pd.read_csv('input/data_sohail_v2/tiltLedger.csv')
+company_product_indicators_df = pd.read_csv('input/data_sohail_v2/company_product_indicators.csv')
+company_indicators_df = pd.read_csv('input/data_sohail_v2/company_indicators.csv')
+sbi_activities_df = pd.read_csv('input/data_sohail_v2/sbi_activities.csv')
+companies_sbi_activities_df = pd.read_csv('input/data_sohail_v2/companies_sbi_activities2.csv')
 
 company_product_indicators_df = company_product_indicators_df.drop_duplicates(keep='first')
 company_product_indicators_df.rename(columns={'tiltledger_id': 'tiltLedger_id'}, inplace=True)
@@ -84,7 +84,7 @@ def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df
         sbi_info = ""
         
     # Logo and company info
-    logo = Image('tiltLogo.png', width=60, height=30)
+    logo = Image('input/tiltLogo.png', width=60, height=30)
     company_info = f"""
     <b>Company Name:</b> {company_df['company_name']}{sbi_info}<br/>
     <b>Address:</b> {company_df['address']}, {company_df['company_city']}, {company_df['postcode']}<br/>
@@ -569,7 +569,7 @@ def create_pdf(output_pdf, company_df, companies_sbi_activities_df, single_activ
             sbi_info = ""
             
         # Logo and company info
-        logo = Image('tiltLogo.png', width=60, height=30)
+        logo = Image('input/tiltLogo.png', width=60, height=30)
         company_info = f"""
         <b>Company Name:</b> {company['company_name']}{sbi_info}<br/>
         <b>Address:</b> {company['address']}, {company['company_city']}, {company['postcode']}<br/>
