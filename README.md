@@ -1,5 +1,5 @@
 # tiltOutputReport
-The goal of tiltOutputReport project is to generate PDF reports with visual and textual data representations for (selected) companies. It can be used to create a pdf for a single company (with or without revenue share data) or for a list of companies. 
+The goal of tiltOutputReport project is to generate PDF reports with visual and textual data representations for (selected) companies. It can be used to create a pdf for a single selected company (with or without revenue share data) and/or for a list of companies. 
 
 ## Project Structure
 - Data Preprocessing: This section deals with data manipulation and preparation using pandas to create DataFrames that are used throughout the project.
@@ -15,12 +15,12 @@ pip install -r requirements.txt
 
 ## Usage
 1. Data Preparation: Place your input CSV files in the `input/data` directory. The input files should include:
-- companies.csv
-- tiltLedger_mapping.csv
-- tiltLedger.csv
-- company_product_indicators.csv
-- company_indicators.csv
-- sbi_activities.csv
-- companies_sbi_activities.csv
+    - companies.csv
+    - tiltLedger_mapping.csv
+    - tiltLedger.csv
+    - company_product_indicators.csv
+    - company_indicators.csv
+    - sbi_activities.csv
+    - companies_sbi_activities.csv
 2. Run the `company_pdf_creation.py` script
-3. Output: The script will generate PDF reports in the output directory. Visualizations will be saved in the figures directory.
+3. Output: The script will generate PDF reports in the `output` directory. Visualizations will be saved in the `figures` directory.
