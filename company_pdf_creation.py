@@ -1,13 +1,6 @@
 import pandas as pd
 import numpy as np
 
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-
-import seaborn as sns
-
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
@@ -40,7 +33,7 @@ company_product_indicators_df.rename(columns={'tiltledger_id': 'tiltLedger_id'},
 
 # Import functions 
 from data_preprocessing import create_single_activity_type_df, calculate_average_ranking, calculate_average_ranking_with_revenue_share
-from data_visualisation_and_descriptions import create_single_indicator_figure, create_single_indicator_figure_with_revenue_shares, create_legend_image, describe_emission_rank, describe_upstream_emission_rank, describe_sector_rank, describe_upstream_sector_rank, describe_transition_risk
+from data_visualisation_and_descriptions import create_single_indicator_figure, create_single_indicator_figure_with_revenue_shares, describe_emission_rank, describe_upstream_emission_rank, describe_sector_rank, describe_upstream_sector_rank, describe_transition_risk
 
 # define company_id of selected individual company 
 selected_company_id = 'grutterij-en-spliterwtenfabriek-j-trouw-bv_nld109318-00101'

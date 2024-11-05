@@ -1,25 +1,9 @@
 # import packages
 import pandas as pd
 import numpy as np
-
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-
 import seaborn as sns
-
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
-from reportlab.lib import colors
-
-import os
-
-from reportlab.platypus import Paragraph
-from reportlab.lib.styles import getSampleStyleSheet
-styles = getSampleStyleSheet()
-normal_style = styles['Normal']
 
 # define data visualisation functions
 def create_single_indicator_figure(data, company_id, company_products, indicator, include_unavailable=False, benchmarks_ep=['tilt_sector'], benchmarks_epu=['input_tilt_sector'], scenarios=['ipr_1.5c rps_2030', 'weo_nz 2050_2030'], benchmark_tr = ['1.5c rps_2030_tilt_sector'], max_label_length=20):
