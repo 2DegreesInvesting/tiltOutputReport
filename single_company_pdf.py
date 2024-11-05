@@ -23,6 +23,9 @@ normal_style = styles['Normal']
 # Ensure the 'plots' directory exists
 os.makedirs('figures', exist_ok=True)
 
+# Ensure the 'output' directory exists
+os.makedirs('output', exist_ok=True)
+
 # Load CSV files into DataFrames
 company_df = pd.read_csv('data_sohail_v2/companies.csv')
 company_tilt_ledger_df = pd.read_csv('data_sohail_v2/tiltLedger_mapping.csv')
@@ -528,10 +531,10 @@ def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df
     return all_company_indicators_df
 
 # run the function without firm specific info 
-company_indicators_df_v1 = create_single_pdf('single_company_report_no_firm_info.pdf', 'without firm-specific information', company_df.iloc[1], companies_sbi_activities_df, create_single_indicator_figure, calculate_average_ranking, single_activity_type=True, manual_average_calculation=True)
+company_indicators_df_v1 = create_single_pdf('output/single_company_report_no_firm_info.pdf', 'without firm-specific information', company_df.iloc[1], companies_sbi_activities_df, create_single_indicator_figure, calculate_average_ranking, single_activity_type=True, manual_average_calculation=True)
 
 # run the function with firm specific info 
-company_indicators_df_v1 = create_single_pdf('single_company_report_with_firm_info.pdf', 'with firm-specific information', company_df.iloc[1], companies_sbi_activities_df, create_single_indicator_figure_with_revenue_shares, calculate_average_ranking_with_revenue_share, single_activity_type=True, manual_average_calculation=True)
+company_indicators_df_v1 = create_single_pdf('output/single_company_report_with_firm_info.pdf', 'with firm-specific information', company_df.iloc[1], companies_sbi_activities_df, create_single_indicator_figure_with_revenue_shares, calculate_average_ranking_with_revenue_share, single_activity_type=True, manual_average_calculation=True)
 
 # combined pdf
 def create_pdf(output_pdf, company_df, companies_sbi_activities_df, single_activity_type=True, manual_average_calculation=True):
@@ -977,5 +980,5 @@ def create_pdf(output_pdf, company_df, companies_sbi_activities_df, single_activ
     return all_company_indicators_df
 
 # Usage
-company_indicators_df_v1 = create_pdf('company_report.pdf', company_df, companies_sbi_activities_df)
+company_indicators_df_v1 = create_pdf('output/company_report.pdf', company_df, companies_sbi_activities_df)
 

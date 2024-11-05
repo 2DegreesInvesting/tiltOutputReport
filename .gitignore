@@ -163,5 +163,4 @@ cython_debug/
 
 # 
 figures/
-#*.csv
-#*.pdf
+output/
