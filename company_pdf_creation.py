@@ -386,7 +386,7 @@ def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df
     ledger_data = [
         [
             Paragraph("CPC Name", bold_style2),
-            Paragraph("Geography<super>3</super>", bold_style2),
+            Paragraph("Geography<super>2</super>", bold_style2),
             Paragraph("ISIC Name", bold_style2),
             Paragraph("Tilt Sector", bold_style2),
             Paragraph("Revenue Share", bold_style2)
@@ -513,9 +513,9 @@ def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df
     ("Tilt sector:", "The corresponding tilt sector of the company's product (in case no Ecoinvent match exists) or the Ecoinvent's activity, if a match exists."),
     ("Transition Risk Indicator:", "The average of the Relative Emission Intensity Indicator, which indicates the firm's exposure, and the Sector Decarbonisation Indicator, which indicates the hazard."),
     ("WEO NZE:", "The World Energy Outlook (WEO) Net Zero Emissions (NZE) Scenario outlines a series of necessary policy actions aimed at achieving net-zero carbon emissions globally by 2050."),
-    ("GHG Scope 1<super>4</super>:", "Direct GHG emission amounts (in tonnes) resulting directly from the company's operations, based on the companies' activities data."),
-    ("GHG Scope 2<super>4</super>:", "Indirect GHG emissions (in tonnes) from the generation of purchased energy and electricity, based on the companies' activities data."),
-    ("GHG Scope 3<super>4</super>:", "All indirect GHG emissions (in tonnes) which are not included in scope 2 that occur in the value chain of the reporting company, including both upstream and downstream emissions, based on the companies' activities data.")
+    ("GHG Scope 1<super>3</super>:", "Direct GHG emission amounts (in tonnes) resulting directly from the company's operations, based on the companies' activities data."),
+    ("GHG Scope 2<super>3</super>:", "Indirect GHG emissions (in tonnes) from the generation of purchased energy and electricity, based on the companies' activities data."),
+    ("GHG Scope 3<super>3</super>:", "All indirect GHG emissions (in tonnes) which are not included in scope 2 that occur in the value chain of the reporting company, including both upstream and downstream emissions, based on the companies' activities data.")
 ]
 
     for term, definition in sorted(glossary_entries):
@@ -848,7 +848,7 @@ def create_pdf(output_pdf, company_df, companies_sbi_activities_df, single_activ
         elements.append(Spacer(1, 6))
         
         # Create ledger_data with additional columns
-        ledger_data = [[Paragraph("CPC Name", bold_style2), Paragraph("Geography<super>3</super>", bold_style2), Paragraph("ISIC Name", bold_style2), Paragraph("Tilt Sector", bold_style2)]]
+        ledger_data = [[Paragraph("CPC Name", bold_style2), Paragraph("Geography<super>2</super>", bold_style2), Paragraph("ISIC Name", bold_style2), Paragraph("Tilt Sector", bold_style2)]]
              
         for cpc_name, geography, isic_name, tilt_sector in company_products[['CPC_Name', 'geography', 'ISIC_Name', 'tilt_sector']].drop_duplicates().itertuples(index=False):
             ledger_data.append([
@@ -962,9 +962,9 @@ def create_pdf(output_pdf, company_df, companies_sbi_activities_df, single_activ
         ("Tilt sector:", "The corresponding tilt sector of the company's product (in case no Ecoinvent match exists) or the Ecoinvent's activity, if a match exists."),
         ("Transition Risk Indicator:", "The average of the Relative Emission Intensity Indicator, which indicates the firm's exposure, and the Sector Decarbonisation Indicator, which indicates the hazard."),
         ("WEO NZE:", "The World Energy Outlook (WEO) Net Zero Emissions (NZE) Scenario outlines a series of necessary policy actions aimed at achieving net-zero carbon emissions globally by 2050."),
-        ("GHG Scope 1<super>4</super>:", "Direct GHG emission amounts (in tonnes) resulting directly from the company's operations, based on the companies' activities data."),
-        ("GHG Scope 2<super>4</super>:", "Indirect GHG emissions (in tonnes) from the generation of purchased energy and electricity, based on the companies' activities data."),
-        ("GHG Scope 3<super>4</super>:", "All indirect GHG emissions (in tonnes) which are not included in scope 2 that occur in the value chain of the reporting company, including both upstream and downstream emissions, based on the companies' activities data.")
+        ("GHG Scope 1<super>3</super>:", "Direct GHG emission amounts (in tonnes) resulting directly from the company's operations, based on the companies' activities data."),
+        ("GHG Scope 2<super>3</super>:", "Indirect GHG emissions (in tonnes) from the generation of purchased energy and electricity, based on the companies' activities data."),
+        ("GHG Scope 3<super>3</super>:", "All indirect GHG emissions (in tonnes) which are not included in scope 2 that occur in the value chain of the reporting company, including both upstream and downstream emissions, based on the companies' activities data.")
     ]
     
         for term, definition in sorted(glossary_entries):
