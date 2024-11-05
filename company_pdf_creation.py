@@ -33,7 +33,7 @@ tilt_ledger_df = pd.read_csv('input/data/tiltLedger.csv')
 company_product_indicators_df = pd.read_csv('input/data/company_product_indicators.csv')
 company_indicators_df = pd.read_csv('input/data/company_indicators.csv')
 sbi_activities_df = pd.read_csv('input/data/sbi_activities.csv')
-companies_sbi_activities_df = pd.read_csv('input/data/companies_sbi_activities2.csv')
+companies_sbi_activities_df = pd.read_csv('input/data/companies_sbi_activities.csv')
 
 company_product_indicators_df = company_product_indicators_df.drop_duplicates(keep='first')
 company_product_indicators_df.rename(columns={'tiltledger_id': 'tiltLedger_id'}, inplace=True)

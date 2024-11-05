@@ -21,6 +21,6 @@ pip install -r requirements.txt
 - company_product_indicators.csv
 - company_indicators.csv
 - sbi_activities.csv
-- companies_sbi_activities2.csv
+- companies_sbi_activities.csv
 2. Run the `company_pdf_creation.py` script
 3. Output: The script will generate PDF reports in the output directory. Visualizations will be saved in the figures directory.
