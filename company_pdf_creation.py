@@ -42,18 +42,29 @@ company_product_indicators_df.rename(columns={'tiltledger_id': 'tiltLedger_id'},
 from data_preprocessing import create_single_activity_type_df, calculate_average_ranking, calculate_average_ranking_with_revenue_share
 from data_visualisation_and_descriptions import create_single_indicator_figure, create_single_indicator_figure_with_revenue_shares, create_legend_image, describe_emission_rank, describe_upstream_emission_rank, describe_sector_rank, describe_upstream_sector_rank, describe_transition_risk
 
-# Add revenue_share column
+# define company_id of selected individual company 
+selected_company_id = 'grutterij-en-spliterwtenfabriek-j-trouw-bv_nld109318-00101'
+
+# show the unique CPC names of this company
+unique_cpc_names = company_product_indicators_df.loc[
+    company_product_indicators_df['company_id'] == selected_company_id,
+    'CPC_Name'
+].unique()
+
+print("Unique CPC_Name values:")
+print(unique_cpc_names)
+
+# Add revenue_share column and fill with placeholder revenue share data for the selected products
 company_product_indicators_df['revenue_share'] = company_product_indicators_df['CPC_Name'].map({
     'Wheat and meslin flour': 10,
     'Groats, meal and pellets of wheat and other cereals': 80,
     'Grain mill product manufacturing services': 10
 })
 
-# Select rows with the specified company_id
-selected_company_product_indicators_df = company_product_indicators_df[company_product_indicators_df['company_id'] == 'grutterij-en-spliterwtenfabriek-j-trouw-bv_nld109318-00101']
+# Select rows for the selected company based on company_id
+selected_company_product_indicators_df = company_product_indicators_df[company_product_indicators_df['company_id'] == selected_company_id]
 
 # without firm-specific information (without revenue shares)
-
 def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df, create_single_indicator_figure_func, calculate_average_ranking_func, single_activity_type=True, manual_average_calculation=True):
     pdf = SimpleDocTemplate(output_pdf, pagesize=letter, leftMargin=34, rightMargin=34, topMargin=30, bottomMargin=10)
     styles = getSampleStyleSheet()
