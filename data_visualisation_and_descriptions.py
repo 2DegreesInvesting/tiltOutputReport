@@ -215,9 +215,6 @@ def create_legend_image():
     plt.savefig(legend_filename, bbox_inches='tight', dpi=300)
     plt.close()
 
-# Usage
-create_legend_image()
-
 def describe_emission_rank(avg_rank, benchmark_label):
     if np.isnan(avg_rank):
         description = "The average relative emission intensity indicator is not available."
