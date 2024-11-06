@@ -82,7 +82,7 @@ def create_single_activity_type_df(data):
     without_benchmarks_avg = (
         without_benchmarks
         .groupby(['company_id', 'CPC_Name', 'Indicator'], as_index=False)
-        .agg(profile_ranking=('profile_ranking', lambda x: x.dropna().loc[x != ''].mean()))
+        .agg(amount=('amount', lambda x: x.dropna().loc[x != ''].mean()))
     )
 
     with_benchmarks_avg['score'] = with_benchmarks_avg.apply(determine_score, axis=1)
@@ -90,7 +90,7 @@ def create_single_activity_type_df(data):
 
     combined_data = pd.concat([with_benchmarks_avg, without_benchmarks_avg], ignore_index=True)
 
-    result = data.drop(columns=['profile_ranking', 'score'], errors='ignore').merge(
+    result = data.drop(columns=['profile_ranking', 'amount', 'score'], errors='ignore').merge(
         combined_data,
         on=['company_id', 'CPC_Name', 'Indicator', 'benchmark'],
         how='left'
@@ -113,10 +113,10 @@ def calculate_average_ranking(product_df, df):
     without_benchmarks_avg = (
         without_benchmarks
         .groupby(['company_id', 'Indicator'], as_index=False)
-        .agg(average_ranking=('profile_ranking', lambda x: x.dropna().loc[x != ''].mean()))
+        .agg(average_amount=('amount', lambda x: x.dropna().loc[x != ''].mean()))
     )
 
-    df = df.drop(columns=['average_ranking', 'company_score'], errors='ignore')
+    df = df.drop(columns=['average_ranking', 'average_amount', 'company_score'], errors='ignore')
 
     df = pd.merge(
         df,
@@ -129,8 +129,7 @@ def calculate_average_ranking(product_df, df):
         df,
         without_benchmarks_avg,
         on=['company_id', 'Indicator'],
-        how='left',
-        suffixes=('', '_no_benchmark')
+        how='left'
     )
 
     df['company_score'] = df.apply(determine_score, axis=1)
@@ -159,11 +158,11 @@ def calculate_average_ranking_with_revenue_share(product_df, df):
         without_benchmarks
         .groupby(['company_id', 'Indicator'], as_index=False)
         .apply(lambda group: pd.Series({
-            'average_ranking': (group['profile_ranking'] * group['revenue_share']).sum() / group['revenue_share'].sum()
+            'average_amount': (group['amount'] * group['revenue_share']).sum() / group['revenue_share'].sum()
         }))
     )
 
-    df = df.drop(columns=['average_ranking', 'company_score'], errors='ignore')
+    df = df.drop(columns=['average_ranking', 'average_amount', 'company_score'], errors='ignore')
 
     df = pd.merge(
         df,
@@ -176,8 +175,7 @@ def calculate_average_ranking_with_revenue_share(product_df, df):
         df,
         without_benchmarks_avg,
         on=['company_id', 'Indicator'],
-        how='left',
-        suffixes=('', '_no_benchmark')
+        how='left'
     )
 
     df['company_score'] = df.apply(determine_score, axis=1)

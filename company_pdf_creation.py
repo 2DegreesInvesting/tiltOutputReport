@@ -304,7 +304,7 @@ def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df
         ]
         
         if not emission_indicator_data.empty:
-            average_ranking = emission_indicator_data['average_ranking_no_benchmark'].values[-1]
+            average_ranking = emission_indicator_data['average_amount'].values[-1]
             average_ranking = f"{average_ranking:.8f}"
         else:
             average_ranking = "N/A"
@@ -789,7 +789,7 @@ def create_pdf(output_pdf, company_df, companies_sbi_activities_df, single_activ
             ]
             
             if not emission_indicator_data.empty:
-                average_ranking = emission_indicator_data['average_ranking_no_benchmark'].values[-1]
+                average_ranking = emission_indicator_data['average_amount'].values[-1]
                 average_ranking = f"{average_ranking:.8f}"
             else:
                 average_ranking = "N/A"
