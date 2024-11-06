@@ -1,63 +1,24 @@
 import pandas as pd
 import numpy as np
 
-# Define the determine_score function outside
-def determine_score(row):
-    """
-    Determines the score based on profile ranking and indicator type.
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
-    Parameters:
-    row (pd.Series): A row of the DataFrame containing columns: average_ranking, Indicator, and benchmark.
+import seaborn as sns
 
-    Returns:
-    str: The score classification based on the profile ranking.
-    """
-    average_ranking = row.get('average_ranking', np.nan)
-    indicator = row['Indicator']
-    benchmark = row.get('benchmark', None)
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageBreak
+from reportlab.lib import colors
 
-    if pd.isna(average_ranking):
-        return 'na'
-    
-    if indicator in ['EP', 'EPU']:
-        if average_ranking < 1/3:
-            return 'low'
-        elif average_ranking > 2/3:
-            return 'high'
-        else:
-            return 'medium'
-    elif indicator in ['SP', 'SPU']:
-        if benchmark in ['ipr_1.5c rps_2030', 'weo_nz 2050_2030']:
-            if average_ranking < 1/9:
-                return 'low'
-            elif average_ranking > 2/9:
-                return 'high'
-            else:
-                return 'medium'
-        if benchmark in ['ipr_1.5c rps_2050', 'weo_nz 2050_2050']:
-            if average_ranking < 1/3:
-                return 'low'
-            elif average_ranking > 2/3:
-                return 'high'
-            else:
-                return 'medium'
-    elif indicator == 'TR':
-        if benchmark == '1.5c rps_2030_tilt_sector':
-            if average_ranking < 0.32:
-                return 'low'
-            elif average_ranking > 0.48:
-                return 'high'
-            else:
-                return 'medium'
-        if benchmark == 'nz 2050_2030_tilt_sector':
-            if average_ranking < 0.3:
-                return 'low'
-            elif average_ranking > 0.47:
-                return 'high'
-            else:
-                return 'medium'
-    elif indicator in ['S1', 'S2', 'S3']:
-        return 'na'  # Placeholder for no specific scoring
+import os
+
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+styles = getSampleStyleSheet()
+normal_style = styles['Normal']
 
 def create_single_activity_type_df(data):
     """
@@ -88,6 +49,55 @@ def create_single_activity_type_df(data):
         .groupby(['company_id', 'CPC_Name', 'Indicator'], as_index=False)
         .agg(profile_ranking=('profile_ranking', lambda x: x.dropna().loc[x != ''].mean()))
     )
+
+    # Define score determination logic
+    def determine_score(row):
+        profile_ranking = row['profile_ranking']
+        indicator = row['Indicator']
+        benchmark = row.get('benchmark', None)
+
+        if pd.isna(profile_ranking):
+            return 'na'
+        
+        if indicator in ['EP', 'EPU']:
+            if profile_ranking < 1/3:
+                return 'low'
+            elif profile_ranking > 2/3:
+                return 'high'
+            else:
+                return 'medium'
+        elif indicator in ['SP', 'SPU']:
+            if benchmark in ['ipr_1.5c rps_2030', 'weo_nz 2050_2030']:
+                if profile_ranking < 1/9:
+                    return 'low'
+                elif profile_ranking > 2/9:
+                    return 'high'
+                else:
+                    return 'medium'
+            if benchmark in ['ipr_1.5c rps_2050', 'weo_nz 2050_2050']:
+                if profile_ranking < 1/3:
+                    return 'low'
+                elif profile_ranking > 2/3:
+                    return 'high'
+                else:
+                    return 'medium'
+        elif indicator == 'TR':
+            if benchmark == '1.5c rps_2030_tilt_sector':
+                if profile_ranking < 0.32:
+                    return 'low'
+                elif profile_ranking > 0.48:
+                    return 'high'
+                else:
+                    return 'medium'
+            if benchmark == 'nz 2050_2030_tilt_sector':
+                if profile_ranking < 0.3:
+                    return 'low'
+                elif profile_ranking > 0.47:
+                    return 'high'
+                else:
+                    return 'medium'
+        elif indicator in ['S1', 'S2', 'S3']:
+            return 'na'  # Placeholder for no specific scoring
 
     # Apply score determination for both DataFrames
     with_benchmarks_avg['score'] = with_benchmarks_avg.apply(determine_score, axis=1)
@@ -158,6 +168,55 @@ def calculate_average_ranking(product_df, df):
         suffixes=('', '_no_benchmark')
     )
 
+    # Determine company score
+    def determine_score(row):
+        average_ranking = row['average_ranking']
+        indicator = row['Indicator']
+        benchmark = row.get('benchmark', None)
+
+        if pd.isna(average_ranking):
+            return 'na'
+        
+        if indicator in ['EP', 'EPU']:
+            if average_ranking < 1/3:
+                return 'low'
+            elif average_ranking > 2/3:
+                return 'high'
+            else:
+                return 'medium'
+        elif indicator in ['SP', 'SPU']:
+            if benchmark in ['ipr_1.5c rps_2030', 'weo_nz 2050_2030']:
+                if average_ranking < 1/9:
+                    return 'low'
+                elif average_ranking > 2/9:
+                    return 'high'
+                else:
+                    return 'medium'
+            if benchmark in ['ipr_1.5c rps_2050', 'weo_nz 2050_2050']:
+                if average_ranking < 1/3:
+                    return 'low'
+                elif average_ranking > 2/3:
+                    return 'high'
+                else:
+                    return 'medium'
+        elif indicator == 'TR':
+            if benchmark == '1.5c rps_2030_tilt_sector':
+                if average_ranking < 0.32:
+                    return 'low'
+                elif average_ranking > 0.48:
+                    return 'high'
+                else:
+                    return 'medium'
+            if benchmark == 'nz 2050_2030_tilt_sector':
+                if average_ranking < 0.3:
+                    return 'low'
+                elif average_ranking > 0.47:
+                    return 'high'
+                else:
+                    return 'medium'
+        elif indicator in ['S1', 'S2', 'S3']:
+            return 'na'  # Placeholder for no specific scoring
+
     df['company_score'] = df.apply(determine_score, axis=1)
 
     # Move average_ranking to column number 6
@@ -223,6 +282,57 @@ def calculate_average_ranking_with_revenue_share(product_df, df):
         how='left',
         suffixes=('', '_no_benchmark')
     )
+
+    # Determine company score
+    def determine_score(row):
+        average_ranking = row['average_ranking']
+        indicator = row['Indicator']
+        benchmark = row.get('benchmark', None)
+
+        if pd.isna(average_ranking):
+            return 'na'
+        
+        if indicator in ['EP', 'EPU']:
+            if average_ranking < 1/3:
+                return 'low'
+            elif average_ranking > 2/3:
+                return 'high'
+            elif average_ranking >= 1/3 and average_ranking <= 2/3:
+                return 'medium'
+            else:
+                return 'nan'
+        elif indicator in ['SP', 'SPU']:
+            if benchmark in ['ipr_1.5c rps_2030', 'weo_nz 2050_2030']:
+                if average_ranking < 1/9:
+                    return 'low'
+                elif average_ranking > 2/9:
+                    return 'high'
+                else:
+                    return 'medium'
+            if benchmark in ['ipr_1.5c rps_2050', 'weo_nz 2050_2050']:
+                if average_ranking < 1/3:
+                    return 'low'
+                elif average_ranking > 2/3:
+                    return 'high'
+                else:
+                    return 'medium'
+        elif indicator == 'TR':
+            if benchmark == '1.5c rps_2030_tilt_sector':
+                if average_ranking < 0.32:
+                    return 'low'
+                elif average_ranking > 0.48:
+                    return 'high'
+                else:
+                    return 'medium'
+            if benchmark == 'nz 2050_2030_tilt_sector':
+                if average_ranking < 0.3:
+                    return 'low'
+                elif average_ranking > 0.47:
+                    return 'high'
+                else:
+                    return 'medium'
+        elif indicator in ['S1', 'S2', 'S3']:
+            return 'na'  # Placeholder for no specific scoring
 
     df['company_score'] = df.apply(determine_score, axis=1)
 

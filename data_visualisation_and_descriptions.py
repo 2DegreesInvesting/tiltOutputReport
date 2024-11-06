@@ -6,31 +6,8 @@ from matplotlib.ticker import MaxNLocator
 import seaborn as sns
 
 # define data visualisation functions
+# without revenue share
 def create_single_indicator_figure(data, company_id, company_products, indicator, include_unavailable=False, benchmarks_ep=['tilt_sector'], benchmarks_epu=['input_tilt_sector'], scenarios=['ipr_1.5c rps_2030', 'weo_nz 2050_2030'], benchmark_tr = ['1.5c rps_2030_tilt_sector'], max_label_length=20):
-    """
-    Generates and saves a bar plot visualizing the distribution of a specified indicator's scores 
-    across different benchmarks or scenarios for a given company, without considering revenue share.
-
-    Parameters:
-    - data (DataFrame): The dataset containing benchmark scores and indicators.
-    - company_id (str): The identifier for the company whose data is being plotted.
-    - company_products (list): A list of products associated with the company.
-    - indicator (str): The specific indicator to visualize (e.g., 'EP', 'EPU', 'SP', 'SPU', 'TR').
-    - include_unavailable (bool, optional): If True, includes products marked as 'unavailable' in the plot. Default is False.
-    - benchmarks_ep (list, optional): The benchmark labels for 'EP' indicators. Default is ['tilt_sector'].
-    - benchmarks_epu (list, optional): The benchmark labels for 'EPU' indicators. Default is ['input_tilt_sector'].
-    - scenarios (list, optional): The scenario labels for 'SP' and 'SPU' indicators. Default is ['ipr_1.5c rps_2030', 'weo_nz 2050_2030'].
-    - benchmark_tr (list, optional): The benchmark labels for 'TR' indicators. Default is ['1.5c rps_2030_tilt_sector'].
-    - max_label_length (int, optional): The maximum label length for y-tick labels, used to adjust the plot layout. Default is 20.
-
-    Returns:
-    - no_total_products (int): The total number of products for the company.
-    - no_available_products (int): The number of products with available scores.
-
-    The function creates a horizontal bar plot that shows the percentage distribution of scores 
-    ('low', 'medium', 'high', and optionally 'unavailable') for a specified indicator. The plot is 
-    saved as a PNG file in the 'figures' directory, named based on the indicator and company ID.
-    """
     sns.set(style="whitegrid")
 
     fig, ax = plt.subplots(figsize=(6, 3))
@@ -118,32 +95,8 @@ def create_single_indicator_figure(data, company_id, company_products, indicator
 
     return no_total_products, no_available_products
 
+# with revenue shares
 def create_single_indicator_figure_with_revenue_shares(data, company_id, company_products, indicator, include_unavailable=False, benchmarks_ep=['tilt_sector'], benchmarks_epu=['input_tilt_sector'], scenarios=['ipr_1.5c rps_2030', 'weo_nz 2050_2030'], benchmark_tr = ['1.5c rps_2030_tilt_sector'], max_label_length=20):
-    """
-    Generates and displays a bar plot visualizing the distribution of a specified indicator's scores 
-    across different benchmarks or scenarios for a given company, incorporating revenue share weights.
-
-    Parameters:
-    - data (DataFrame): The dataset containing benchmark scores, indicators, and revenue shares.
-    - company_id (str): The identifier for the company whose data is being plotted.
-    - company_products (list): A list of products associated with the company.
-    - indicator (str): The specific indicator to visualize (e.g., 'EP', 'EPU', 'SP', 'SPU', 'TR').
-    - include_unavailable (bool, optional): If True, includes products marked as 'unavailable' in the plot. Default is False.
-    - benchmarks_ep (list, optional): The benchmark labels for 'EP' indicators. Default is ['tilt_sector'].
-    - benchmarks_epu (list, optional): The benchmark labels for 'EPU' indicators. Default is ['input_tilt_sector'].
-    - scenarios (list, optional): The scenario labels for 'SP' and 'SPU' indicators. Default is ['ipr_1.5c rps_2030', 'weo_nz 2050_2030'].
-    - benchmark_tr (list, optional): The benchmark labels for 'TR' indicators. Default is ['1.5c rps_2030_tilt_sector'].
-    - max_label_length (int, optional): The maximum label length for y-tick labels, used to adjust the plot layout. Default is 20.
-
-    Returns:
-    - no_total_products (int): The total number of products for the company.
-    - no_available_products (int): The number of products with available scores.
-
-    This function creates a horizontal bar plot that shows the percentage distribution of scores 
-    ('low', 'medium', 'high', and optionally 'unavailable') for a specified indicator, weighted by 
-    revenue share. The plot is saved as a PNG file in the 'figures' directory, named based on the 
-    indicator and company ID. 
-    """
     sns.set(style="whitegrid")
 
     fig, ax = plt.subplots(figsize=(6, 3))
@@ -195,7 +148,6 @@ def create_single_indicator_figure_with_revenue_shares(data, company_id, company
 
     # Calculate weighted score counts using revenue_share
     group['weighted_revenue_share'] = group['revenue_share'] / group['revenue_share'].sum()
-
     score_counts_v2 = group.groupby(['benchmark', 'score'])['weighted_revenue_share'].sum().reindex(full_index, fill_value=0).unstack(fill_value=np.nan)
     number_of_na_v2 = no_total_products - score_counts_v2.sum(axis=1)
     no_available_products_v2 = no_total_products - number_of_na_v2
@@ -263,7 +215,9 @@ def create_legend_image():
     plt.savefig(legend_filename, bbox_inches='tight', dpi=300)
     plt.close()
 
-# Define functions that describe the results
+# Usage
+create_legend_image()
+
 def describe_emission_rank(avg_rank, benchmark_label):
     if np.isnan(avg_rank):
         description = "The average relative emission intensity indicator is not available."
