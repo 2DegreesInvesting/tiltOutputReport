@@ -23,6 +23,7 @@ from data_visualisation_and_descriptions import describe_emission_rank, describe
 
 # Load company indicators CSV files into DataFrames
 company_indicators_df = pd.read_csv('input/data_v2/company_indicators.csv')
+company_df = pd.read_csv('input/data_v2/companies.csv')
 
 company_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
 company_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
@@ -65,7 +66,7 @@ def create_single_portfolio_indicator_figure(data, indicator, include_unavailabl
     filtered_data = group[group['benchmark'].isin(indicator_benchmarks)]
 
     # Calculate number of unique companies
-    no_total_companies = filtered_data['company_id'].nunique()
+    no_total_companies = company_df['company_id'].nunique()
 
     full_index = pd.MultiIndex.from_product(
         [indicator_benchmarks, all_scores],
@@ -322,7 +323,7 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
 
         # Calculate number of unique companies
         group = company_indicators_df[company_indicators_df['Indicator'] == s_indicator]
-        no_total_companies = company_indicators_df['company_id'].nunique()
+        no_total_companies = company_df['company_id'].nunique()
         no_available_companies = group['company_id'].nunique()
 
         # Prepare row based on the current indicator
