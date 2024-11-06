@@ -303,6 +303,66 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
 
     elements.append(combined_tables)
 
+    # Define data for the emission indicators table
+    emission_table_data = [
+        [Paragraph("GHG Emissions Indicators", bold_style2), Paragraph("Average Absolute emissions (in tCO2eq)", bold_style2), Paragraph("Share of Companies With a Score", bold_style2)]
+    ]
+    
+    # Loop through each GHG scope indicator
+    for s_indicator in ['S1', 'S2', 'S3']:
+        emission_indicator_data = company_indicators_df[
+            company_indicators_df['Indicator'] == s_indicator
+        ]
+        
+        if not emission_indicator_data.empty:
+            portfolio_average_amount = emission_indicator_data['average_amount'].mean() 
+            portfolio_average_amount = f"{portfolio_average_amount:.8f}"
+        else:
+            average_ranking = "N/A"
+
+        # Calculate number of unique companies
+        group = company_indicators_df[company_indicators_df['Indicator'] == s_indicator]
+        no_total_companies = company_indicators_df['company_id'].nunique()
+        no_available_companies = group['company_id'].nunique()
+
+        # Prepare row based on the current indicator
+        if s_indicator == 'S1':
+            row_label = "Scope 1 Indicator"
+        elif s_indicator == 'S2':
+            row_label = "Scope 2 Indicator"
+        else:
+            row_label = "Scope 3 Indicator"
+        
+        coverage_text = f"{no_available_companies}/{no_total_companies}"
+        
+        # Append the row to the table data
+        emission_table_data.append([
+            Paragraph(row_label, normal_style),
+            Paragraph(str(portfolio_average_amount), normal_style),
+            Paragraph(coverage_text, normal_style)
+        ])
+    
+    # Create the table
+    emission_table = Table(emission_table_data, colWidths=[175, 175, 175])
+    
+    # Apply styles to the table
+    emission_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#287155')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey)
+    ]))
+    
+    # Append the table to the elements list
+    elements.append(emission_table)
+    elements.append(Spacer(1, 20))
+
+    # Add footnote text at the bottom of the page
+    footnotes.append(Paragraph("<super>1</super> Company score: this is the average of the available product scores.", normal_style))
+    elements.extend(footnotes)
+
     pdf.build(elements)
 
 # run the function without firm specific info 
