@@ -29,14 +29,14 @@ def determine_score(row):
     if pd.isna(average_ranking):
         return 'na'
     
-    if indicator in ['EP', 'EPU']:
+    if indicator in ['REI', 'IREI']:
         if average_ranking < 1/3:
             return 'low'
         elif average_ranking > 2/3:
             return 'high'
         else:
             return 'medium'
-    elif indicator in ['SP', 'SPU']:
+    elif indicator in ['SD', 'ISD']:
         if benchmark in ['ipr_1.5c rps_2030', 'weo_nz 2050_2030']:
             if average_ranking < 1/9:
                 return 'low'

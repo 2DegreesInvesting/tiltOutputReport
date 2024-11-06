@@ -19,17 +19,25 @@ os.makedirs('figures', exist_ok=True)
 # Ensure the 'output' directory exists
 os.makedirs('output', exist_ok=True)
 
-# Load CSV files into DataFrames
-company_df = pd.read_csv('input/data/companies.csv')
-company_tilt_ledger_df = pd.read_csv('input/data/tiltLedger_mapping.csv')
-tilt_ledger_df = pd.read_csv('input/data/tiltLedger.csv')
-company_product_indicators_df = pd.read_csv('input/data/company_product_indicators.csv')
-company_indicators_df = pd.read_csv('input/data/company_indicators.csv')
-sbi_activities_df = pd.read_csv('input/data/sbi_activities.csv')
-companies_sbi_activities_df = pd.read_csv('input/data/companies_sbi_activities.csv')
+# Load NEW CSV files into DataFrames
+company_df = pd.read_csv('input/data_v2/companies.csv')
+company_tilt_ledger_df = pd.read_csv('input/data_v2/tiltledger_mapping.csv')
+tilt_ledger_df = pd.read_csv('input/data_v2/tilt_ledger.csv')
+company_product_indicators_df = pd.read_csv('input/data_v2/company_product_indicators.csv')
+company_indicators_df = pd.read_csv('input/data_v2/company_indicators.csv')
+sbi_activities_df = pd.read_csv('input/data_v2/sbi_activities.csv')
+companies_sbi_activities_df = pd.read_csv('input/data_v2/companies_sbi_activities.csv')
 
 company_product_indicators_df = company_product_indicators_df.drop_duplicates(keep='first')
 company_product_indicators_df.rename(columns={'tiltledger_id': 'tiltLedger_id'}, inplace=True)
+
+company_product_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
+company_product_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
+company_product_indicators_df.rename(columns={'risk_category': 'score'}, inplace=True)
+
+company_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
+company_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
+company_indicators_df.rename(columns={'company_risk_category': 'score'}, inplace=True)
 
 # Import functions 
 from data_preprocessing import create_single_activity_type_df, calculate_average_ranking, calculate_average_ranking_with_revenue_share
@@ -49,9 +57,8 @@ print(unique_cpc_names)
 
 # Add revenue_share column and fill with placeholder revenue share data for the selected products
 company_product_indicators_df['revenue_share'] = company_product_indicators_df['CPC_Name'].map({
-    'Wheat and meslin flour': 10,
-    'Groats, meal and pellets of wheat and other cereals': 80,
-    'Grain mill product manufacturing services': 10
+    'Wheat and meslin flour': 20,
+    'Groats, meal and pellets of wheat and other cereals': 80
 })
 
 # Select rows for the selected company based on company_id
@@ -123,18 +130,18 @@ def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df
     all_company_indicators_df.append(seleted_company_indicators_df)
 
     benchmarks = {
-        "EP": "tilt_sector",
-        "EPU": "input_tilt_sector",
-        "SP": "ipr_1.5c rps_2030",
-        "SPU": "ipr_1.5c rps_2030",
+        "REI": "tilt_sector",
+        "IREI": "input_tilt_sector",
+        "SD": "ipr_1.5c rps_2030",
+        "ISD": "ipr_1.5c rps_2030",
         "TR": "1.5c rps_2030_tilt_sector"
     }
 
     indicator_labels = {
-        "EP": "Relative Emission Intensity Indicator<br/>",
-        "EPU": "Input Relative Emission Intensity Indicator<br/>",
-        "SP": "Sector Decarbonisation Indicator<br/>",
-        "SPU": "Input Sector Decarbonisation Indicator<br/>",
+        "REI": "Relative Emission Intensity Indicator<br/>",
+        "IREI": "Input Relative Emission Intensity Indicator<br/>",
+        "SD": "Sector Decarbonisation Indicator<br/>",
+        "ISD": "Input Sector Decarbonisation Indicator<br/>",
         "TR": "Transition Risk Indicator<br/>",
         "S1": "Scope 1 Emissions<br/>",
         "S2": "Scope 2 Emissions<br/>",
@@ -172,22 +179,22 @@ def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df
         benchmark_label = benchmark_labels[benchmark]
         
         # summary description
-        if indicator == 'EP':
+        if indicator == 'REI':
             description = describe_emission_rank(average_ranking, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
-        if indicator == 'EPU':
+        if indicator == 'IREI':
             description = describe_upstream_emission_rank(average_ranking, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
-        if indicator == 'SP':
+        if indicator == 'SD':
             description = describe_sector_rank(average_ranking, benchmark, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
-        if indicator == 'SPU':
+        if indicator == 'ISD':
             description = describe_upstream_sector_rank(average_ranking, benchmark, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
@@ -399,7 +406,7 @@ def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df
         if title == "with firm-specific information": 
             revenue_share_percentage = f"{revenue_share:.0f}%" 
         else: 
-            revenue_share_percentage = "33%"
+            revenue_share_percentage = "50%"
         
         ledger_data.append([
             Paragraph(str(cpc_name) if not pd.isna(cpc_name) else 'N/A', normal_style),
@@ -428,7 +435,7 @@ def create_single_pdf(output_pdf, title, company_df, companies_sbi_activities_df
     elements.append(Spacer(1, 8))
 
     # DQ Cards
-    indicators = ['EP', 'EPU', 'SP', 'SPU']
+    indicators = ['REI', 'IREI', 'SD', 'ISD']
     grouped = seleted_company_indicators_df.groupby('Indicator')
     
     # Create a template DataFrame for indicators
@@ -608,22 +615,22 @@ def create_pdf(output_pdf, company_df, companies_sbi_activities_df, single_activ
         all_company_indicators_df.append(seleted_company_indicators_df)
 
         benchmarks = {
-            "EP": "tilt_sector",
-            "EPU": "input_tilt_sector",
-            "SP": "ipr_1.5c rps_2030",
-            "SPU": "ipr_1.5c rps_2030",
-            "TR": "1.5c rps_2030_tilt_sector"
+        "REI": "tilt_sector",
+        "IREI": "input_tilt_sector",
+        "SD": "ipr_1.5c rps_2030",
+        "ISD": "ipr_1.5c rps_2030",
+        "TR": "1.5c rps_2030_tilt_sector"
         }
 
         indicator_labels = {
-            "EP": "Relative Emission Intensity Indicator<br/>",
-            "EPU": "Input Relative Emission Intensity Indicator<br/>",
-            "SP": "Sector Decarbonisation Indicator<br/>",
-            "SPU": "Input Sector Decarbonisation Indicator<br/>",
-            "TR": "Transition Risk Indicator<br/>",
-            "S1": "Scope 1 Emissions<br/>",
-            "S2": "Scope 2 Emissions<br/>",
-            "S3": "Scope 3 Emissions<br/>"
+        "REI": "Relative Emission Intensity Indicator<br/>",
+        "IREI": "Input Relative Emission Intensity Indicator<br/>",
+        "SD": "Sector Decarbonisation Indicator<br/>",
+        "ISD": "Input Sector Decarbonisation Indicator<br/>",
+        "TR": "Transition Risk Indicator<br/>",
+        "S1": "Scope 1 Emissions<br/>",
+        "S2": "Scope 2 Emissions<br/>",
+        "S3": "Scope 3 Emissions<br/>"
         }
 
         benchmark_labels = {
@@ -657,22 +664,22 @@ def create_pdf(output_pdf, company_df, companies_sbi_activities_df, single_activ
             benchmark_label = benchmark_labels[benchmark]
             
             # summary description
-            if indicator == 'EP':
+            if indicator == 'REI':
                 description = describe_emission_rank(average_ranking, benchmark_label)
                 elements.append(Paragraph(f"{description}", normal_style))
                 elements.append(Spacer(1, 4))
 
-            if indicator == 'EPU':
+            if indicator == 'IREI':
                 description = describe_upstream_emission_rank(average_ranking, benchmark_label)
                 elements.append(Paragraph(f"{description}", normal_style))
                 elements.append(Spacer(1, 4))
 
-            if indicator == 'SP':
+            if indicator == 'SD':
                 description = describe_sector_rank(average_ranking, benchmark, benchmark_label)
                 elements.append(Paragraph(f"{description}", normal_style))
                 elements.append(Spacer(1, 4))
 
-            if indicator == 'SPU':
+            if indicator == 'ISD':
                 description = describe_upstream_sector_rank(average_ranking, benchmark, benchmark_label)
                 elements.append(Paragraph(f"{description}", normal_style))
                 elements.append(Spacer(1, 4))
@@ -877,7 +884,7 @@ def create_pdf(output_pdf, company_df, companies_sbi_activities_df, single_activ
         elements.append(Spacer(1, 8))
 
         # DQ Cards
-        indicators = ['EP', 'EPU', 'SP', 'SPU']
+        indicators = ['REI', 'IREI', 'SD', 'ISD']
         grouped = seleted_company_indicators_df.groupby('Indicator')
         
         # Create a template DataFrame for indicators

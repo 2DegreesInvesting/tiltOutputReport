@@ -7,7 +7,7 @@ import seaborn as sns
 
 # define data visualisation functions
 # without revenue share
-def create_single_indicator_figure(data, company_id, company_products, indicator, include_unavailable=False, benchmarks_ep=['tilt_sector'], benchmarks_epu=['input_tilt_sector'], scenarios=['ipr_1.5c rps_2030', 'weo_nz 2050_2030'], benchmark_tr = ['1.5c rps_2030_tilt_sector'], max_label_length=20):
+def create_single_indicator_figure(data, company_id, company_products, indicator, include_unavailable=False, benchmarks_rei=['tilt_sector'], benchmarks_irei=['input_tilt_sector'], scenarios=['ipr_1.5c rps_2030', 'weo_nz 2050_2030'], benchmark_tr = ['1.5c rps_2030_tilt_sector'], max_label_length=20):
     sns.set(style="whitegrid")
 
     fig, ax = plt.subplots(figsize=(6, 3))
@@ -19,10 +19,10 @@ def create_single_indicator_figure(data, company_id, company_products, indicator
         plot_colors.append('#E2E5E9')
 
     benchmarks_dict = {
-        "EP": benchmarks_ep,
-        "EPU": benchmarks_epu,
-        "SP": scenarios,
-        "SPU": scenarios, 
+        "REI": benchmarks_rei,
+        "IREI": benchmarks_irei,
+        "SD": scenarios,
+        "ISD": scenarios, 
         "TR": benchmark_tr
     }
 
@@ -73,7 +73,7 @@ def create_single_indicator_figure(data, company_id, company_products, indicator
     
         ax.set_xlim(0, 100)
         ax.set_xlabel("Percentage", fontsize=12, color='black')
-        ax.set_ylabel("Benchmark" if indicator in ["EP", "EPU"] else "Scenario", fontsize=12, color='black')
+        ax.set_ylabel("Benchmark" if indicator in ["REI", "IREI"] else "Scenario", fontsize=12, color='black')
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.tick_params(axis='y', rotation=0, colors='black', labelsize=10)
     
@@ -96,7 +96,7 @@ def create_single_indicator_figure(data, company_id, company_products, indicator
     return no_total_products, no_available_products
 
 # with revenue shares
-def create_single_indicator_figure_with_revenue_shares(data, company_id, company_products, indicator, include_unavailable=False, benchmarks_ep=['tilt_sector'], benchmarks_epu=['input_tilt_sector'], scenarios=['ipr_1.5c rps_2030', 'weo_nz 2050_2030'], benchmark_tr = ['1.5c rps_2030_tilt_sector'], max_label_length=20):
+def create_single_indicator_figure_with_revenue_shares(data, company_id, company_products, indicator, include_unavailable=False, benchmarks_rei=['tilt_sector'], benchmarks_irei=['input_tilt_sector'], scenarios=['ipr_1.5c rps_2030', 'weo_nz 2050_2030'], benchmark_tr = ['1.5c rps_2030_tilt_sector'], max_label_length=20):
     sns.set(style="whitegrid")
 
     fig, ax = plt.subplots(figsize=(6, 3))
@@ -108,10 +108,10 @@ def create_single_indicator_figure_with_revenue_shares(data, company_id, company
         plot_colors.append('#E2E5E9')
 
     benchmarks_dict = {
-        "EP": benchmarks_ep,
-        "EPU": benchmarks_epu,
-        "SP": scenarios,
-        "SPU": scenarios, 
+        "REI": benchmarks_rei,
+        "IREI": benchmarks_irei,
+        "SD": scenarios,
+        "ISD": scenarios, 
         "TR": benchmark_tr
     }
 
@@ -176,7 +176,7 @@ def create_single_indicator_figure_with_revenue_shares(data, company_id, company
     
         ax.set_xlim(0, 100)
         ax.set_xlabel("Percentage", fontsize=12, color='black')
-        ax.set_ylabel("Benchmark" if indicator in ["EP", "EPU"] else "Scenario", fontsize=12, color='black')
+        ax.set_ylabel("Benchmark" if indicator in ["REI", "IREI"] else "Scenario", fontsize=12, color='black')
         ax.xaxis.set_major_locator(MaxNLocator(integer=True))
         ax.tick_params(axis='y', rotation=0, colors='black', labelsize=10)
     
