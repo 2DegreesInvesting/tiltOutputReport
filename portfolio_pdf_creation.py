@@ -428,60 +428,75 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     elements.append(emission_table)
     elements.append(Spacer(1, 20))
 
+    # Add footnote text at the bottom of the page
+    footnotes.append(Paragraph("<super>1</super> Portfolio score: this is the average of the available company scores.", normal_style))
+    elements.extend(footnotes)
+
     # Add the sector distribution image
     sector_distribution_image = Image('figures/sector_distribution.png', width=300, height=300)
     elements.append(sector_distribution_image)
     elements.append(Spacer(1, 12))
 
-    # Assuming company_indicators_df is your DataFrame
+    # Indicator labels
+    indicator_labels = {
+        "REI": "Relative Emission Intensity Indicator",
+        "IREI": "Input Relative Emission Intensity Indicator",
+        "SD": "Sector Decarbonisation Indicator",
+        "ISD": "Input Sector Decarbonisation Indicator",
+        "TR": "Transition Risk Indicator",
+        "S1": "Scope 1 Emissions",
+        "S2": "Scope 2 Emissions",
+        "S3": "Scope 3 Emissions"
+    }
+
+    # Merge company names into indicators DataFrame
+    merged_companies_df = company_indicators_df.merge(company_df[['company_id', 'company_name']], on='company_id', how='left')
 
     # Filter and sort for REI indicator with tilt_sector benchmark
-    rei_worst_companies = company_indicators_df[
-        (company_indicators_df['Indicator'] == 'REI') &
-        (company_indicators_df['benchmark'] == 'tilt_sector')
+    rei_worst_companies = merged_companies_df[
+        (merged_companies_df['Indicator'] == 'REI') &
+        (merged_companies_df['benchmark'] == 'tilt_sector')
     ].nsmallest(10, 'average_ranking')
 
     # Filter and sort for SD indicator with ipr_1.5c rps_2030 benchmark
-    sd_worst_companies = company_indicators_df[
-        (company_indicators_df['Indicator'] == 'SD') &
-        (company_indicators_df['benchmark'] == 'ipr_1.5c rps_2030')
+    sd_worst_companies = merged_companies_df[
+        (merged_companies_df['Indicator'] == 'SD') &
+        (merged_companies_df['benchmark'] == 'ipr_1.5c rps_2030')
     ].nsmallest(10, 'average_ranking')
 
-    # Combine results
-    combined_worst_companies = pd.concat([rei_worst_companies, sd_worst_companies])
-
     # Prepare data for the table
-    worst_companies_list = [
-        (row['company_id'], f"{row['average_ranking']:.2f}")
-        for _, row in combined_worst_companies.iterrows()
+    rei_list = [
+        f"{i+1}. {row.company_name} ({row.average_ranking:.2f})"
+        for i, row in enumerate(rei_worst_companies.itertuples())
     ]
 
-    # Sort the combined list by the average ranking again to ensure ordering
-    worst_companies_list.sort(key=lambda x: float(x[1]))  # Convert strings back to float for sorting
+    sd_list = [
+        f"{i+1}. {row.company_name} ({row.average_ranking:.2f})"
+        for i, row in enumerate(sd_worst_companies.itertuples())
+    ]
 
-    # Add rank and format for PDF table
-    table_data = [['Rank', 'Company ID', 'Average Ranking']]
-    table_data += [[str(i+1), company_id, f"{avg_ranking}"] for i, (company_id, avg_ranking) in enumerate(worst_companies_list)]
+    # Compile table data
+    max_len = max(len(rei_list), len(sd_list))
+    rei_list.extend([''] * (max_len - len(rei_list)))
+    sd_list.extend([''] * (max_len - len(sd_list)))
+    table_data = [[indicator_labels["REI"], indicator_labels["SD"]]] + list(zip(rei_list, sd_list))
 
     # Create a PDF table
     styles = getSampleStyleSheet()
-    table = Table(table_data, colWidths=[50, 150, 100])
+    table = Table(table_data, colWidths=[250, 250])
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#287155')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
     ]))
 
-    # Assuming you have a PDF being created with elements
-    elements.append(table)
 
-    # Add footnote text at the bottom of the page
-    footnotes.append(Paragraph("<super>1</super> Company score: this is the average of the available product scores.", normal_style))
-    elements.extend(footnotes)
+    # Add the table to the PDF elements
+    elements.append(table)
 
     pdf.build(elements)
 
