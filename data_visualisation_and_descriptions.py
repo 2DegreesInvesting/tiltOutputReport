@@ -362,46 +362,47 @@ def describe_transition_risk(avg_rank, benchmark, benchmark_label):
 
     return description
 
+
+
+
+
+
 # for portfolio -> NOT SURE HOW TO FORMULATE
 def describe_emission_rank_portfolio_level(avg_rank, benchmark_label):
     if np.isnan(avg_rank):
-        description = "The average relative emission intensity indicator is not available."
+        description = "The portfolio's average relative emission intensity indicator is not available."
     else:
-        description = f"The average relative emission score is {avg_rank:.2f}. "
+        description = f"The portfolio's average relative emission score is {avg_rank:.2f}. "
     
     if avg_rank < 1/3:
-        description += "This indicates that, on average, the companies in the portfolio have a <b>low</b> CO2e (kg/unit) emission intensity compared to others in the chosen reference group."
+        description += "This suggests that the average of the CO2e (kg/unit) emission intensity across the companies in the portfolio is <b>low</b>. "
     elif avg_rank < 2/3:
-        description += "This suggests that, on average, the firm's products have a <b>medium</b> CO2e (kg/unit) emission intensity compared to others in the chosen reference group."
+        description += "This suggests that the average of the CO2e (kg/unit) emission intensity across the companies in the portfolio is <b>medium</b>."
     elif avg_rank > 2/3:
-        description += "This indicates that, on average, the firm's products have a <b>high</b> CO2e (kg/unit) emission intensity compared to others in the chosen reference group."
-        
-    description += f" The chosen reference group is the <b>{benchmark_label}</b>."
+        description += "This suggests that the average of the CO2e (kg/unit) emission intensity across the companies in the portfolio is <b>high</b>." 
     
     return description
 
 def describe_upstream_emission_rank_portfolio_level(avg_rank, benchmark_label):
     if np.isnan(avg_rank):
-        description = "The average input relative emission intensity indicator is not available."
+        description = "The portfolio's average input relative emission intensity indicator is not available."
     else:
-        description = f"The average input relative emission intensity indicator is {avg_rank:.2f}. "
+        description = f"The portfolio's average input relative emission intensity indicator is {avg_rank:.2f}. "
     
     if avg_rank < 0.33:
-        description += "This indicates that, on average, the firm's input products have a <b>low</b> CO2e (kg/unit) emission intensity compared to others in the chosen reference group."
+        description += "This suggests that the average of the input CO2e (kg/unit) emission intensity across the companies in the portfolio is <b>low</b>."
     elif avg_rank < 0.67:
-        description += "This suggests that, on average, the firm's input products have a <b>medium</b> CO2e (kg/unit) emission intensity relative to others in the chosen reference group."
+        description += "This suggests that the average of the input CO2e (kg/unit) emission intensity across the companies in the portfolio is <b>medium</b>."
     elif avg_rank > 0.67:
-        description += "This indicates that, on average, the firm's input products have a <b>high</b> CO2e (kg/unit) emission intensity compared to others in the chosen reference group."
-        
-    description += f" The chosen reference group is the <b>{benchmark_label}</b>."
+        description += "This suggests that the average of the input CO2e (kg/unit) emission intensity across the companies in the portfolio is <b>high</b>."
     
     return description
 
 def describe_sector_rank_portfolio_level(avg_rank, benchmark, benchmark_label):
     if np.isnan(avg_rank):
-        description = "The average sector decarbonisation indicator is not available."
+        description = "The portfolio's average sector decarbonisation indicator is not available."
     else:
-        description = f"The average sector decarbonisation indicator is {avg_rank:.2f}. "
+        description = f"The portfolio's average sector decarbonisation indicator is {avg_rank:.2f}. "
 
     # Determine pressure level based on benchmark
     if benchmark in ['ipr_1.5c rps_2030', 'weo_nz 2050_2030']:
@@ -424,23 +425,19 @@ def describe_sector_rank_portfolio_level(avg_rank, benchmark, benchmark_label):
             pressure_level = np.nan
     
     if pressure_level == 'low':
-        description += "This indicates that, on average, there is <b>low</b> pressure on the firm to reduce its CO2e (kg/unit) emissions."
+        description += "This suggests that the average of the pressure on the firms to reduce their CO2e (kg/unit) emissions across the companies in the portfolio is <b>low</b>."
     elif pressure_level == 'medium':
-        description += "This suggests that, on average, there is <b>medium</b> pressure on the firm to reduce its CO2e (kg/unit) emissions."
+        description += "TThis suggests that the average of the pressure on the firms to reduce their CO2e (kg/unit) emissions across the companies in the portfolio is <b>medium</b>."
     elif pressure_level == 'high':
-        description += "This indicates that, on average, there is <b>high</b> pressure on the firm to reduce its CO2e (kg/unit) emissions."
-
-    scenario_name = benchmark_label[:-5]  # Removes the last 5 characters (including space)
-    scenario_year = benchmark_label[-4:]  # Gets the last 4 characters
-    description += f" The chosen scenario is the <b>{scenario_name}</b> scenario with the target year <b>{scenario_year}</b>."
+        description += "This suggests that the average of the pressure on the firms to reduce their CO2e (kg/unit) emissions across the companies in the portfolio is <b>high</b>."
     
     return description
     
 def describe_upstream_sector_rank_portfolio_level(avg_rank, benchmark, benchmark_label):
     if np.isnan(avg_rank):
-        description = "The average input sector decarbonisation indicator is not available."
+        description = "The portfolio's average input sector decarbonisation indicator is not available."
     else:
-        description = f"The average input sector decarbonisation indicator is {avg_rank:.2f}. "
+        description = f"The portfolio's average input sector decarbonisation indicator is {avg_rank:.2f}. "
 
     # Determine pressure level based on benchmark
     if benchmark in ['ipr_1.5c rps_2030', 'weo_nz 2050_2030']:
@@ -463,23 +460,19 @@ def describe_upstream_sector_rank_portfolio_level(avg_rank, benchmark, benchmark
             pressure_level = np.nan
     
     if pressure_level == 'low':
-        description += "This indicates that, on average, there is <b>low</b> pressure on the firm to reduce its CO2e (kg/unit) emissions based on the input products."
+        description += "This suggests that the average pressure on the firms to reduce their CO2e (kg/unit) emissions (based on their input products) across the companies in the portfolio is <b>low</b>."
     elif pressure_level == 'medium':
-        description += "This suggests that, on average, there is <b>medium</b> pressure on the firm to reduce its CO2e (kg/unit) emissions based on the input products."
+        description += "This suggests that the average pressure on the firms to reduce their CO2e (kg/unit) emissions (based on their input products) across the companies in the portfolio is <b>medium</b>."
     elif pressure_level == 'high':
-        description += "This indicates that, on average, there is <b>high</b> pressure on the firm to reduce its CO2e (kg/unit) emissions based on the input products."
-
-    scenario_name = benchmark_label[:-5]  # Removes the last 5 characters (including space)
-    scenario_year = benchmark_label[-4:]  # Gets the last 4 characters
-    description += f" The chosen scenario is the <b>{scenario_name}</b> scenario with the target year <b>{scenario_year}</b>."
+        description += "This suggests that the average pressure on the firms to reduce their CO2e (kg/unit) emissions (based on their input products) across the companies in the portfolio is <b>high</b>."
 
     return description
 
 def describe_transition_risk_portfolio_level(avg_rank, benchmark, benchmark_label):
     if np.isnan(avg_rank):
-        description = "The average transition risk indicator is not available."
+        description = "The portfolio's average transition risk indicator is not available."
     else:
-        description = f"The average transition risk indicator is {avg_rank:.2f}. "
+        description = f"The portfolio's average transition risk indicator is {avg_rank:.2f}. "
 
     # Determine pressure level based on benchmark
     if benchmark == '1.5c rps_2030_tilt_sector':
@@ -493,19 +486,14 @@ def describe_transition_risk_portfolio_level(avg_rank, benchmark, benchmark_labe
             pressure_level = np.nan
     
     if pressure_level == 'low':
-        description += "This indicates that, on average, the transition risk is <b>low</b> relative to other firms in terms of their hazards and exposures."
+        description += "This suggests that the average transition risk across the companies in the portfolio is <b>low</b>."
     elif pressure_level == 'medium':
-        description += "This indicates that, on average, the transition risk is <b>medium</b> relative to other firms in terms of their hazards and exposures."
+        description += "This suggests that the average transition risk across the companies in the portfolio is <b>medium</b>."
     elif pressure_level == 'high':
-        description += "This indicates that, on average, the transition risk is <b>high</b> relative to other firms in terms of their hazards and exposures."
+        description += "This suggests that the average transition risk across the companies in the portfolio is <b>high</b>."
 
     parts = benchmark_label.split(" & ")
     reference_group = parts[0]
     scenario_part = parts[1]
-
-    scenario_name = scenario_part[:-5]  # Removes the last 5 characters (including space)
-    scenario_year = scenario_part[-4:]  # Gets the last 4 characters
-
-    description += f" The chosen reference group is the <b>{reference_group}</b> and the chosen scenario is the <b>{scenario_name}</b> scenario with the target year <b>{scenario_year}</b>."
 
     return description
