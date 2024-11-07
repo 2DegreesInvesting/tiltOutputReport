@@ -460,8 +460,8 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
 
     # Filter and sort for SD indicator with ipr_1.5c rps_2030 benchmark
     sd_worst_companies = merged_companies_df[
-        (merged_companies_df['Indicator'] == 'SD') &
-        (merged_companies_df['benchmark'] == 'ipr_1.5c rps_2030')
+        (merged_companies_df['Indicator'] == 'TR') &
+        (merged_companies_df['benchmark'] == '1.5c rps_2030_tilt_sector')
     ].nsmallest(10, 'average_ranking')
 
     # Prepare data for the table
@@ -479,7 +479,7 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     max_len = max(len(rei_list), len(sd_list))
     rei_list.extend([''] * (max_len - len(rei_list)))
     sd_list.extend([''] * (max_len - len(sd_list)))
-    table_data = [[indicator_labels["REI"], indicator_labels["SD"]]] + list(zip(rei_list, sd_list))
+    table_data = [[indicator_labels["REI"], indicator_labels["TR"]]] + list(zip(rei_list, sd_list))
 
     # Create a PDF table
     styles = getSampleStyleSheet()
