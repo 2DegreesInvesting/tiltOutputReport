@@ -19,20 +19,92 @@ from reportlab.lib.styles import getSampleStyleSheet
 styles = getSampleStyleSheet()
 normal_style = styles['Normal']
 
-from data_visualisation_and_descriptions import describe_emission_rank, describe_upstream_emission_rank, describe_sector_rank, describe_upstream_sector_rank, describe_transition_risk
+from data_visualisation_and_descriptions import describe_emission_rank_portfolio_level, describe_upstream_emission_rank_portfolio_level, describe_sector_rank_portfolio_level, describe_upstream_sector_rank_portfolio_level, describe_transition_risk_portfolio_level
 
 # Load company indicators CSV files into DataFrames
 company_indicators_df = pd.read_csv('input/data_v2/company_indicators.csv')
 company_df = pd.read_csv('input/data_v2/companies.csv')
+company_product_indicators_df = pd.read_csv('input/data_v2/company_product_indicators.csv')
 
 company_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
 company_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
 company_indicators_df.rename(columns={'company_risk_category': 'score'}, inplace=True)
 
+company_product_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
+company_product_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
+company_product_indicators_df.rename(columns={'company_risk_category': 'score'}, inplace=True)
+
 print(company_indicators_df)
 print(company_indicators_df.columns)
 
-def create_single_portfolio_indicator_figure(data, indicator, include_unavailable=False, benchmarks_rei=['tilt_sector'], benchmarks_irei=['input_tilt_sector'], scenarios=['ipr_1.5c rps_2030', 'weo_nz 2050_2030'], benchmark_tr = ['1.5c rps_2030_tilt_sector'], max_label_length=20):
+# Group by company_id and tilt_sector to count occurrences
+tilt_sector_counts = company_product_indicators_df.groupby(['company_id', 'tilt_sector']).size().reset_index(name='count')
+
+# Find the most frequent tilt_sector for each company_id
+most_frequent_tilt_sector = tilt_sector_counts.loc[tilt_sector_counts.groupby('company_id')['count'].idxmax()]
+
+# Select only company_id and tilt_sector columns
+most_frequent_tilt_sector = most_frequent_tilt_sector[['company_id', 'tilt_sector']]
+
+# Rename the tilt_sector column to company_tilt_sector for clarity
+most_frequent_tilt_sector = most_frequent_tilt_sector.rename(columns={'tilt_sector': 'company_tilt_sector'})
+
+# Merge this data back into company_df
+company_df = pd.merge(company_df, most_frequent_tilt_sector, on='company_id', how='left')
+
+# Now company_df includes the most frequent tilt_sector as company_tilt_sector
+print(company_df)
+
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Assuming company_df is your DataFrame
+
+# Calculate the distribution of each sector
+sector_distribution = company_df['company_tilt_sector'].value_counts()
+
+# Calculate total number of unique sectors
+total_sectors = sector_distribution.nunique()
+
+# Create the pie chart
+fig, ax = plt.subplots(figsize=(6, 6))
+
+# Plot pie chart without labels
+wedges, texts, autotexts = ax.pie(
+    sector_distribution,
+    labels=None,  # No labels here
+    autopct='%1.1f%%',
+    startangle=90,
+    colors=plt.cm.Paired.colors
+)
+
+# Draw circle for the center
+centre_circle = plt.Circle((0, 0), 0.70, fc='white')
+fig.gca().add_artist(centre_circle)
+
+# Equal aspect ratio ensures that pie is drawn as a circle.
+ax.axis('equal')
+
+# Add a legend
+ax.legend(wedges, sector_distribution.index, title="Sectors", loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
+
+# Display total sectors in the center
+ax.annotate(
+    f'Total\nSectors\n{total_sectors}',
+    xy=(0, 0),
+    fontsize=24,
+    ha='center',
+    va='center',
+    weight='bold'
+)
+
+# Save plot
+plt.tight_layout()
+plt.savefig('figures/sector_distribution.png', dpi=300)
+
+
+
+def create_single_portfolio_indicator_figure_bar(data, indicator, include_unavailable=False, benchmarks_rei=['tilt_sector'], benchmarks_irei=['input_tilt_sector'], scenarios=['ipr_1.5c rps_2030', 'weo_nz 2050_2030'], benchmark_tr = ['1.5c rps_2030_tilt_sector'], max_label_length=20):
     sns.set(style="whitegrid")
 
     fig, ax = plt.subplots(figsize=(6, 3))
@@ -63,7 +135,6 @@ def create_single_portfolio_indicator_figure(data, indicator, include_unavailabl
 
     group = data[data['Indicator'] == indicator]
     indicator_benchmarks = benchmarks_dict[indicator]
-    filtered_data = group[group['benchmark'].isin(indicator_benchmarks)]
 
     # Calculate number of unique companies
     no_total_companies = company_df['company_id'].nunique()
@@ -121,9 +192,6 @@ def create_single_portfolio_indicator_figure(data, indicator, include_unavailabl
     plt.close()
 
     return no_total_companies, no_available_companies
-
-no_total_companies, no_available_companies = create_single_portfolio_indicator_figure(company_indicators_df, 'ISD')
-
 
 def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single_portfolio_indicator_figure):
     pdf = SimpleDocTemplate(output_pdf, pagesize=letter, leftMargin=34, rightMargin=34, topMargin=30, bottomMargin=10)
@@ -217,27 +285,27 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
 
         # summary description
         if indicator == 'REI':
-            description = describe_emission_rank(average_ranking, benchmark_label)
+            description = describe_emission_rank_portfolio_level(average_ranking, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
         if indicator == 'IREI':
-            description = describe_upstream_emission_rank(average_ranking, benchmark_label)
+            description = describe_upstream_emission_rank_portfolio_level(average_ranking, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
         if indicator == 'SD':
-            description = describe_sector_rank(average_ranking, benchmark, benchmark_label)
+            description = describe_sector_rank_portfolio_level(average_ranking, benchmark, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
         if indicator == 'ISD':
-            description = describe_upstream_sector_rank(average_ranking, benchmark, benchmark_label)
+            description = describe_upstream_sector_rank_portfolio_level(average_ranking, benchmark, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
         if indicator == "TR": 
-            description = describe_transition_risk(average_ranking, benchmark, benchmark_label)
+            description = describe_transition_risk_portfolio_level(average_ranking, benchmark, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 8))
                 
@@ -360,6 +428,57 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     elements.append(emission_table)
     elements.append(Spacer(1, 20))
 
+    # Add the sector distribution image
+    sector_distribution_image = Image('figures/sector_distribution.png', width=300, height=300)
+    elements.append(sector_distribution_image)
+    elements.append(Spacer(1, 12))
+
+    # Assuming company_indicators_df is your DataFrame
+
+    # Filter and sort for REI indicator with tilt_sector benchmark
+    rei_worst_companies = company_indicators_df[
+        (company_indicators_df['Indicator'] == 'REI') &
+        (company_indicators_df['benchmark'] == 'tilt_sector')
+    ].nsmallest(10, 'average_ranking')
+
+    # Filter and sort for SD indicator with ipr_1.5c rps_2030 benchmark
+    sd_worst_companies = company_indicators_df[
+        (company_indicators_df['Indicator'] == 'SD') &
+        (company_indicators_df['benchmark'] == 'ipr_1.5c rps_2030')
+    ].nsmallest(10, 'average_ranking')
+
+    # Combine results
+    combined_worst_companies = pd.concat([rei_worst_companies, sd_worst_companies])
+
+    # Prepare data for the table
+    worst_companies_list = [
+        (row['company_id'], f"{row['average_ranking']:.2f}")
+        for _, row in combined_worst_companies.iterrows()
+    ]
+
+    # Sort the combined list by the average ranking again to ensure ordering
+    worst_companies_list.sort(key=lambda x: float(x[1]))  # Convert strings back to float for sorting
+
+    # Add rank and format for PDF table
+    table_data = [['Rank', 'Company ID', 'Average Ranking']]
+    table_data += [[str(i+1), company_id, f"{avg_ranking}"] for i, (company_id, avg_ranking) in enumerate(worst_companies_list)]
+
+    # Create a PDF table
+    styles = getSampleStyleSheet()
+    table = Table(table_data, colWidths=[50, 150, 100])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#287155')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+    ]))
+
+    # Assuming you have a PDF being created with elements
+    elements.append(table)
+
     # Add footnote text at the bottom of the page
     footnotes.append(Paragraph("<super>1</super> Company score: this is the average of the available product scores.", normal_style))
     elements.extend(footnotes)
@@ -367,4 +486,7 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     pdf.build(elements)
 
 # run the function without firm specific info 
-create_single_portfolio_pdf("output/portfolio.pdf", company_indicators_df, create_single_portfolio_indicator_figure)
+create_single_portfolio_pdf("output/portfolio.pdf", company_indicators_df, create_single_portfolio_indicator_figure_bar)
+
+
+
