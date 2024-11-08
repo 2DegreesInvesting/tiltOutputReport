@@ -22,17 +22,20 @@ normal_style = styles['Normal']
 from data_visualisation_and_descriptions import describe_emission_rank_portfolio_level, describe_upstream_emission_rank_portfolio_level, describe_sector_rank_portfolio_level, describe_upstream_sector_rank_portfolio_level, describe_transition_risk_portfolio_level
 
 # Load company indicators CSV files into DataFrames
-company_indicators_df = pd.read_csv('input/data_v2/company_indicators.csv')
-company_df = pd.read_csv('input/data_v2/companies.csv')
-company_product_indicators_df = pd.read_csv('input/data_v2/company_product_indicators.csv')
+company_indicators_df = pd.read_csv('input/data_v3/company_indicators.csv')
+company_df = pd.read_csv('input/data_v3/companies.csv')
+company_product_indicators_df = pd.read_csv('input/data_v3/company_product_indicators.csv')
+
 
 company_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
 company_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
 company_indicators_df.rename(columns={'company_risk_category': 'score'}, inplace=True)
+company_indicators_df.rename(columns={'average_indicator_result': 'average_ranking'}, inplace=True)
 
 company_product_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
 company_product_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
 company_product_indicators_df.rename(columns={'company_risk_category': 'score'}, inplace=True)
+company_product_indicators_df.rename(columns={'average_indicator_result': 'average_ranking'}, inplace=True)
 
 print(company_indicators_df)
 print(company_indicators_df.columns)
@@ -451,18 +454,18 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
 
     # Merge company names into indicators DataFrame
     merged_companies_df = company_indicators_df.merge(company_df[['company_id', 'company_name']], on='company_id', how='left')
-
+    print(merged_companies_df.columns)
     # Filter and sort for REI indicator with tilt_sector benchmark
     rei_worst_companies = merged_companies_df[
         (merged_companies_df['Indicator'] == 'REI') &
         (merged_companies_df['benchmark'] == 'tilt_sector')
-    ].nsmallest(10, 'average_ranking')
+    ].nlargest(10, 'average_ranking')
 
     # Filter and sort for SD indicator with ipr_1.5c rps_2030 benchmark
     sd_worst_companies = merged_companies_df[
         (merged_companies_df['Indicator'] == 'TR') &
         (merged_companies_df['benchmark'] == '1.5c rps_2030_tilt_sector')
-    ].nsmallest(10, 'average_ranking')
+    ].nlargest(10, 'average_ranking')
 
     # Prepare data for the table
     rei_list = [
