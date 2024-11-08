@@ -63,13 +63,11 @@ print(company_df)
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# Assuming company_df is your DataFrame
-
 # Calculate the distribution of each sector
 sector_distribution = company_df['company_tilt_sector'].value_counts()
 
 # Calculate total number of unique sectors
-total_sectors = sector_distribution.nunique()
+total_sectors = company_df['company_tilt_sector'].nunique()
 
 # Create the pie chart
 fig, ax = plt.subplots(figsize=(6, 6))
@@ -447,10 +445,7 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     footnotes.append(Paragraph("<super>1</super> Portfolio score: this is the average of the available company scores.", normal_style))
     elements.extend(footnotes)
 
-    # Add the sector distribution image
-    sector_distribution_image = Image('figures/sector_distribution.png', width=300, height=300)
-    elements.append(sector_distribution_image)
-    elements.append(Spacer(1, 12))
+    elements.append(PageBreak())
 
     # Indicator labels
     indicator_labels = {
@@ -466,18 +461,19 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
 
     # Merge company names into indicators DataFrame
     merged_companies_df = company_indicators_df.merge(company_df[['company_id', 'company_name']], on='company_id', how='left')
-    print(merged_companies_df.columns)
+    merged_companies_df = merged_companies_df.drop_duplicates(subset=['company_id', 'Indicator', 'benchmark'], keep='first')
+
     # Filter and sort for REI indicator with tilt_sector benchmark
     rei_worst_companies = merged_companies_df[
         (merged_companies_df['Indicator'] == 'REI') &
         (merged_companies_df['benchmark'] == 'tilt_sector')
-    ].nlargest(10, 'average_ranking')
+    ].nlargest(min(10, merged_companies_df.shape[0]), 'average_ranking')  # Adjust nlargest if fewer companies
 
-    # Filter and sort for SD indicator with ipr_1.5c rps_2030 benchmark
+    # Filter and sort for SD indicator with 1.5c rps_2030_tilt_sector benchmark
     sd_worst_companies = merged_companies_df[
         (merged_companies_df['Indicator'] == 'TR') &
         (merged_companies_df['benchmark'] == '1.5c rps_2030_tilt_sector')
-    ].nlargest(10, 'average_ranking')
+    ].nlargest(min(10, merged_companies_df.shape[0]), 'average_ranking')  # Adjust nlargest accordingly
 
     # Prepare data for the table
     rei_list = [
@@ -496,6 +492,21 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     sd_list.extend([''] * (max_len - len(sd_list)))
     table_data = [[indicator_labels["REI"], indicator_labels["TR"]]] + list(zip(rei_list, sd_list))
 
+    # Create the title as a one-cell table
+    title_data = [["Worst Performing Companies per Indicator"]]
+    title_table = Table(title_data, colWidths=[500])
+    title_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#287155')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+        ('TOPPADDING', (0, 0), (-1, -1), 12),
+    ]))
+    elements.append(title_table)
+    elements.append(Spacer(1, 6))
+
     # Create a PDF table
     styles = getSampleStyleSheet()
     table = Table(table_data, colWidths=[250, 250])
@@ -513,10 +524,18 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     # Add the table to the PDF elements
     elements.append(table)
 
+    # Add the sector distribution image
+    sector_distribution_image = Image('figures/sector_distribution.png', width=300, height=300)
+    elements.append(sector_distribution_image)
+    elements.append(Spacer(1, 12))
+
     pdf.build(elements)
 
 # run the function without firm specific info 
 create_single_portfolio_pdf("output/portfolio.pdf", company_indicators_df, create_single_portfolio_indicator_figure_bar)
 
 
-
+merged_companies_df = company_indicators_df.merge(company_df[['company_id', 'company_name']], on='company_id', how='left')
+merged_companies_df = merged_companies_df.drop_duplicates(subset=['company_id', 'Indicator'])
+duplicates = merged_companies_df[merged_companies_df.duplicated(subset=['company_id', 'Indicator', 'benchmark'])]
+print(duplicates)
