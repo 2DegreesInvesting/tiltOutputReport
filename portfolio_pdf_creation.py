@@ -23,9 +23,9 @@ from data_visualisation_and_descriptions import describe_emission_rank_portfolio
 from data_preprocessing import determine_score
 
 # Load company indicators CSV files into DataFrames
-company_indicators_df = pd.read_csv('input/data_v3/company_indicators.csv')
-company_df = pd.read_csv('input/data_v3/companies.csv')
-company_product_indicators_df = pd.read_csv('input/data_v3/company_product_indicators.csv')
+company_indicators_df = pd.read_csv('input/data_v4/company_indicators.csv')
+company_df = pd.read_csv('input/data_v4/companies.csv')
+company_product_indicators_df = pd.read_csv('input/data_v4/company_product_indicators.csv')
 
 company_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
 company_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
@@ -402,7 +402,7 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
             portfolio_average_amount = emission_indicator_data['average_amount'].mean() 
             portfolio_average_amount = f"{portfolio_average_amount:.8f}"
         else:
-            average_ranking = "N/A"
+            portfolio_average_amount = "N/A"
 
         # Calculate number of unique companies
         group = company_indicators_df[company_indicators_df['Indicator'] == s_indicator]
