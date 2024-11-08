@@ -60,9 +60,6 @@ company_df = pd.merge(company_df, most_frequent_tilt_sector, on='company_id', ho
 # Now company_df includes the most frequent tilt_sector as company_tilt_sector
 print(company_df)
 
-import matplotlib.pyplot as plt
-import pandas as pd
-
 # Calculate the distribution of each sector
 sector_distribution = company_df['company_tilt_sector'].value_counts()
 
@@ -460,7 +457,7 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     }
 
     # Merge company names into indicators DataFrame
-    merged_companies_df = company_indicators_df.merge(company_df[['company_id', 'company_name']], on='company_id', how='left')
+    merged_companies_df = company_indicators_df.merge(company_df[['company_id', 'company_name', 'company_tilt_sector']], on='company_id', how='left')
     merged_companies_df = merged_companies_df.drop_duplicates(subset=['company_id', 'Indicator', 'benchmark'], keep='first')
 
     # Filter and sort for REI indicator with tilt_sector benchmark
@@ -469,11 +466,45 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
         (merged_companies_df['benchmark'] == 'tilt_sector')
     ].nlargest(min(10, merged_companies_df.shape[0]), 'average_ranking')  # Adjust nlargest if fewer companies
 
+    # Count the number of companies in each sector
+    rei_worst_sector_counts = rei_worst_companies['company_tilt_sector'].value_counts()
+
+    # Plot the histogram
+    fig, ax = plt.subplots(figsize=(8, 5))
+    rei_worst_sector_counts.plot(kind='bar', color='skyblue', ax=ax)
+
+    # Add titles and labels
+    ax.set_title('Sector Distribution among Worst Performing REI Companies')
+    ax.set_xlabel('Company Tilt Sector')
+    ax.set_ylabel('Number of Companies')
+    plt.xticks(rotation=45, ha='right')
+    # Save the plot as a PNG file
+    plt.tight_layout()
+    plt.savefig('worst_rei_sector_distribution.png')
+    plt.close(fig)  # Close the figure to free up memory
+
     # Filter and sort for SD indicator with 1.5c rps_2030_tilt_sector benchmark
     sd_worst_companies = merged_companies_df[
         (merged_companies_df['Indicator'] == 'TR') &
         (merged_companies_df['benchmark'] == '1.5c rps_2030_tilt_sector')
     ].nlargest(min(10, merged_companies_df.shape[0]), 'average_ranking')  # Adjust nlargest accordingly
+
+    # Count the number of companies in each sector
+    sd_worst_sector_counts = sd_worst_companies['company_tilt_sector'].value_counts()
+
+    # Plot the histogram
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sd_worst_sector_counts.plot(kind='bar', color='skyblue', ax=ax)
+
+    # Add titles and labels
+    ax.set_title('Sector Distribution among Worst Performing TR Companies')
+    ax.set_xlabel('Company Tilt Sector')
+    ax.set_ylabel('Number of Companies')
+    plt.xticks(rotation=45, ha='right')
+    # Save the plot as a PNG file
+    plt.tight_layout()
+    plt.savefig('worst_sd_sector_distribution.png')
+    plt.close(fig)  # Close the figure to free up memory
 
     # Prepare data for the table
     rei_list = [
@@ -529,13 +560,28 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     elements.append(sector_distribution_image)
     elements.append(Spacer(1, 12))
 
+    # Load the images
+    rei_sector_distribution_image = Image('worst_rei_sector_distribution.png', width=240, height=180)
+    sd_sector_distribution_image = Image('worst_sd_sector_distribution.png', width=240, height=180)
+
+    # Create a table with two columns to place images side by side
+    images_table = Table([[rei_sector_distribution_image, sd_sector_distribution_image]], colWidths=[250, 250])
+
+    # Set the style for the table
+    images_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+    ]))
+
+    # Add the table to elements
+    elements.append(images_table)
+    elements.append(Spacer(1, 12))
+
+
     pdf.build(elements)
 
 # run the function without firm specific info 
 create_single_portfolio_pdf("output/portfolio.pdf", company_indicators_df, create_single_portfolio_indicator_figure_bar)
 
-
-merged_companies_df = company_indicators_df.merge(company_df[['company_id', 'company_name']], on='company_id', how='left')
-merged_companies_df = merged_companies_df.drop_duplicates(subset=['company_id', 'Indicator'])
-duplicates = merged_companies_df[merged_companies_df.duplicated(subset=['company_id', 'Indicator', 'benchmark'])]
-print(duplicates)
