@@ -20,12 +20,12 @@ styles = getSampleStyleSheet()
 normal_style = styles['Normal']
 
 from data_visualisation_and_descriptions import describe_emission_rank_portfolio_level, describe_upstream_emission_rank_portfolio_level, describe_sector_rank_portfolio_level, describe_upstream_sector_rank_portfolio_level, describe_transition_risk_portfolio_level
+from data_preprocessing import determine_score
 
 # Load company indicators CSV files into DataFrames
 company_indicators_df = pd.read_csv('input/data_v3/company_indicators.csv')
 company_df = pd.read_csv('input/data_v3/companies.csv')
 company_product_indicators_df = pd.read_csv('input/data_v3/company_product_indicators.csv')
-
 
 company_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
 company_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
@@ -35,10 +35,12 @@ company_indicators_df.rename(columns={'average_indicator_result': 'average_ranki
 company_product_indicators_df.rename(columns={'indicator': 'Indicator'}, inplace=True)
 company_product_indicators_df.rename(columns={'benchmark_group': 'benchmark'}, inplace=True)
 company_product_indicators_df.rename(columns={'company_risk_category': 'score'}, inplace=True)
-company_product_indicators_df.rename(columns={'average_indicator_result': 'average_ranking'}, inplace=True)
 
-print(company_indicators_df)
-print(company_indicators_df.columns)
+company_indicators_df['average_ranking'] = pd.to_numeric(company_indicators_df['average_ranking'], errors='coerce')
+
+
+#print(company_indicators_df)
+#print(company_indicators_df.columns)
 
 # Group by company_id and tilt_sector to count occurrences
 tilt_sector_counts = company_product_indicators_df.groupby(['company_id', 'tilt_sector']).size().reset_index(name='count')
@@ -275,40 +277,50 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
         ]
         
         print(indicator_data.columns)
+        #indicator_data['average_ranking'] = pd.to_numeric(indicator_data['average_ranking'], errors='coerce')
 
         if not indicator_data.empty:
-            average_ranking = round(indicator_data['average_ranking'].values[0], 2)
-            company_score = indicator_data['score'].values[0]
-            display_score = f"{company_score.capitalize()} ({average_ranking}<super>1</super>)" if company_score in ["high", "medium", "low"] else "N/A"
+            portfolio_average_ranking = indicator_data['average_ranking'].mean()
+            portfolio_average_ranking = round(portfolio_average_ranking, 2)
+            # Construct a row-like dictionary to use with determine_score
+            row_like = {
+                'average_ranking': portfolio_average_ranking,
+                'Indicator': indicator,
+                'benchmark': benchmark
+            }
+            # Determine the portfolio score
+            portfolio_score = determine_score(row_like)
+            #company_score = indicator_data['score'].values[0]
+            display_score = f"{portfolio_score.capitalize()} ({portfolio_average_ranking}<super>1</super>)" if portfolio_score in ["high", "medium", "low"] else "N/A"
         else:
             display_score = "N/A"
-            company_score = "Not Available"
+            portfolio_score = "Not Available"
 
         benchmark_label = benchmark_labels[benchmark]
 
         # summary description
         if indicator == 'REI':
-            description = describe_emission_rank_portfolio_level(average_ranking, benchmark_label)
+            description = describe_emission_rank_portfolio_level(portfolio_average_ranking, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
         if indicator == 'IREI':
-            description = describe_upstream_emission_rank_portfolio_level(average_ranking, benchmark_label)
+            description = describe_upstream_emission_rank_portfolio_level(portfolio_average_ranking, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
         if indicator == 'SD':
-            description = describe_sector_rank_portfolio_level(average_ranking, benchmark, benchmark_label)
+            description = describe_sector_rank_portfolio_level(portfolio_average_ranking, benchmark, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
         if indicator == 'ISD':
-            description = describe_upstream_sector_rank_portfolio_level(average_ranking, benchmark, benchmark_label)
+            description = describe_upstream_sector_rank_portfolio_level(portfolio_average_ranking, benchmark, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 4))
 
         if indicator == "TR": 
-            description = describe_transition_risk_portfolio_level(average_ranking, benchmark, benchmark_label)
+            description = describe_transition_risk_portfolio_level(portfolio_average_ranking, benchmark, benchmark_label)
             elements.append(Paragraph(f"{description}", normal_style))
             elements.append(Spacer(1, 8))
                 
@@ -319,7 +331,7 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
             'Not Available': '#E2E5E9'
         }
         
-        indicators_colors[indicator] = bg_color[company_score]
+        indicators_colors[indicator] = bg_color[portfolio_score]
 
         no_total_companies, no_available_companies = create_single_portfolio_indicator_figure(company_indicators_df, indicator)
         
