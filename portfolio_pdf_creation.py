@@ -78,6 +78,9 @@ wedges, texts, autotexts = ax.pie(
     colors=plt.cm.Paired.colors
 )
 
+# Extract colors from wedges and create a color dictionary
+sector_colors = {sector: wedge.get_facecolor() for sector, wedge in zip(sector_distribution.index, wedges)}
+
 # Draw circle for the center
 centre_circle = plt.Circle((0, 0), 0.70, fc='white')
 fig.gca().add_artist(centre_circle)
@@ -471,10 +474,10 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
 
     # Plot the histogram
     fig, ax = plt.subplots(figsize=(8, 5))
-    rei_worst_sector_counts.plot(kind='bar', color='skyblue', ax=ax)
+    rei_worst_sector_counts.plot(kind='bar', ax=ax, color=[sector_colors[sector] for sector in rei_worst_sector_counts.index])
 
     # Add titles and labels
-    ax.set_title('Sector Distribution among Worst Performing REI Companies')
+    ax.set_title('Sector Distribution among Worst Performing Companies (based on Relative Emission Intensity Indicator)')
     ax.set_xlabel('Company Tilt Sector')
     ax.set_ylabel('Number of Companies')
     plt.xticks(rotation=45, ha='right')
@@ -494,10 +497,10 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
 
     # Plot the histogram
     fig, ax = plt.subplots(figsize=(8, 5))
-    sd_worst_sector_counts.plot(kind='bar', color='skyblue', ax=ax)
+    sd_worst_sector_counts.plot(kind='bar', color=[sector_colors[sector] for sector in sd_worst_sector_counts.index], ax=ax)
 
     # Add titles and labels
-    ax.set_title('Sector Distribution among Worst Performing TR Companies')
+    ax.set_title('Sector Distribution among Worst Performing Companies (based on Transition Risk Indicator)')
     ax.set_xlabel('Company Tilt Sector')
     ax.set_ylabel('Number of Companies')
     plt.xticks(rotation=45, ha='right')
@@ -555,11 +558,6 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
     # Add the table to the PDF elements
     elements.append(table)
 
-    # Add the sector distribution image
-    sector_distribution_image = Image('figures/sector_distribution.png', width=300, height=300)
-    elements.append(sector_distribution_image)
-    elements.append(Spacer(1, 12))
-
     # Load the images
     rei_sector_distribution_image = Image('worst_rei_sector_distribution.png', width=240, height=180)
     sd_sector_distribution_image = Image('worst_sd_sector_distribution.png', width=240, height=180)
@@ -577,8 +575,12 @@ def create_single_portfolio_pdf(output_pdf, company_indicators_df, create_single
 
     # Add the table to elements
     elements.append(images_table)
-    elements.append(Spacer(1, 12))
+    elements.append(Spacer(1, 2))
 
+    # Add the sector distribution image
+    sector_distribution_image = Image('figures/sector_distribution.png', width=300, height=300)
+    elements.append(sector_distribution_image)
+    elements.append(Spacer(1, 6))
 
     pdf.build(elements)
 
